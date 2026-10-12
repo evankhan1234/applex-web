@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { bankEmiData } from '../../lib/emiData';
+import { bankEmiData, activeBankEmiData } from '../../lib/emiData';
 
 const monthColumns = [
   { key: 'm3', label: '3M' },
@@ -8,6 +8,7 @@ const monthColumns = [
   { key: 'm12', label: '12M' },
   { key: 'm18', label: '18M' },
   { key: 'm24', label: '24M' },
+  { key: 'm30', label: '30M' },
   { key: 'm36', label: '36M' },
 ];
 
@@ -71,7 +72,7 @@ export default function EmiPolicyPage() {
                 </tr>
               </thead>
               <tbody>
-                {bankEmiData.map((bank, idx) => (
+                {(activeBankEmiData.length > 0 ? activeBankEmiData : bankEmiData.filter(b => !b.hidden)).map((bank, idx) => (
                   <tr key={bank.bank} className={`border-b border-gray-100 hover:bg-gray-50 transition-colors ${idx % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'}`}>
                     <td className="px-5 py-3 text-sm font-bold text-gray-900 whitespace-nowrap font-[family-name:var(--font-outfit)]">{bank.bank}</td>
                     {monthColumns.map((col) => (

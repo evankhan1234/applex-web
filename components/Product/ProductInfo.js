@@ -293,25 +293,42 @@ export default function ProductInfo({
             </div>
 
             {/* Price section */}
-            <div className="mb-0 font-[family-name:var(--font-outfit)]" style={{ paddingTop: '26px' }}>
-                <div className="flex flex-wrap items-baseline gap-2 mb-1">
-                    <span className="inline-flex items-baseline gap-0.5 text-[28px] md:text-[32px] font-bold text-gray-900 tracking-tight">
-                        <span className="font-bold leading-none" style={{ fontFamily: "'Hind Siliguri','Noto Sans Bengali','Arial',sans-serif" }}>৳</span>
-                        <span>{(Number(String(displayPriceAmount).replace(/[^\d]/g, '')) + selectedCarePlans.reduce((sum, p) => sum + (Number(p.price) || 0), 0)).toLocaleString('en-IN')}</span>
-                    </span>
-                    {displayOldPrice && (
-                        <span className="inline-flex items-baseline gap-0.5 text-sm text-gray-400 line-through">
-                            <span style={{ fontFamily: "'Hind Siliguri','Noto Sans Bengali','Arial',sans-serif" }}>৳</span>
-                            <span>{displayOldPriceAmount}</span>
+            {!isUsedPhoneProduct ? (
+                <div className="mb-0 font-[family-name:var(--font-outfit)]" style={{ paddingTop: '26px' }}>
+                    <div className="flex flex-wrap items-baseline gap-2 mb-1">
+                        <span className="inline-flex items-baseline gap-0.5 text-[28px] md:text-[32px] font-bold text-gray-900 tracking-tight">
+                            <span className="font-bold leading-none" style={{ fontFamily: "'Hind Siliguri','Noto Sans Bengali','Arial',sans-serif" }}>৳</span>
+                            <span>{(Number(String(displayPriceAmount).replace(/[^\d]/g, '')) + selectedCarePlans.reduce((sum, p) => sum + (Number(p.price) || 0), 0)).toLocaleString('en-IN')}</span>
                         </span>
-                    )}
-                    {product.hasDiscount && saveAmount > 0 && (
-                        <span className="text-xs font-bold text-white bg-black px-2 py-0.5 rounded">Save {saveAmount.toLocaleString('en-IN')}</span>
-                    )}
+                        {displayOldPrice && (
+                            <span className="inline-flex items-baseline gap-0.5 text-sm text-gray-400 line-through">
+                                <span style={{ fontFamily: "'Hind Siliguri','Noto Sans Bengali','Arial',sans-serif" }}>৳</span>
+                                <span>{displayOldPriceAmount}</span>
+                            </span>
+                        )}
+                        {product.hasDiscount && saveAmount > 0 && (
+                            <span className="text-xs font-bold text-white bg-black px-2 py-0.5 rounded">Save {saveAmount.toLocaleString('en-IN')}</span>
+                        )}
+                    </div>
+                    <p className="text-[12px] text-gray-500">Price includes VAT</p>
+                    <hr className="border-t border-gray-200" style={{ marginTop: '26px', marginBottom: '0px' }} />
                 </div>
-                <p className="text-[12px] text-gray-500">Price includes VAT</p>
-                <hr className="border-t border-gray-200" style={{ marginTop: '26px', marginBottom: '0px' }} />
-            </div>
+            ) : (
+                <div className="mb-0 font-[family-name:var(--font-outfit)]" style={{ paddingTop: '20px' }}>
+                    <div className="flex items-center gap-2.5 py-2.5 px-3.5 rounded-lg bg-[#f0fdf4] border border-[#bbf7d0] text-[#15803d]">
+                        <FaWhatsapp className="w-5 h-5 shrink-0 text-[#25D366]" />
+                        <div>
+                            <p className="text-xs md:text-sm font-bold leading-tight">
+                                Price on Inquiry — Call or Chat for Live Price &amp; Availability
+                            </p>
+                            <p className="text-[11px] text-[#166534] mt-0.5">
+                                Verified pre-owned stock with genuine warranty support
+                            </p>
+                        </div>
+                    </div>
+                    <hr className="border-t border-gray-200" style={{ marginTop: '20px', marginBottom: '0px' }} />
+                </div>
+            )}
 
             {hasVariants && isUsedPhoneProduct && (
                 <div className="space-y-6 mb-6" style={{ paddingTop: '26px' }}>
@@ -668,6 +685,7 @@ export default function ProductInfo({
                     selectedCarePlans={selectedCarePlans}
                     toggleCarePlan={toggleCarePlan}
                     openEmiTrigger={emiOpenTrigger}
+                    isUsedPhoneProduct={isUsedPhoneProduct}
                 />
             </div>
 
@@ -676,6 +694,7 @@ export default function ProductInfo({
                 variantSelection={variantSelection}
                 selectedCarePlans={selectedCarePlans}
                 displayPrice={displayPrice}
+                isUsedPhoneProduct={isUsedPhoneProduct}
                 className="mt-4"
             />
 

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect } from "react";
+import { isUsedPhoneProduct } from "../lib/siteContact";
 
 const CartContext = createContext();
 
@@ -31,6 +32,9 @@ export function CartProvider({ children }) {
     }, [cartItems]);
 
     const addToCart = (product, quantity = 1, variants = null, openSidebar = true) => {
+        if (!product || isUsedPhoneProduct(product)) {
+            return;
+        }
         setCartItems((prevItems) => {
             // Create a unique matching key based on id and variants
             const variantKey = variants ? JSON.stringify(variants) : "default";

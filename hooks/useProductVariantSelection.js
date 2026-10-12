@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useMemo, useEffect, useCallback } from 'react';
+import { isUsedPhoneProduct as checkIsUsedPhone } from '../lib/siteContact';
 
 const DIMENSION_ORDER = ['color', 'model', 'storage', 'battery_life', 'region'];
 
@@ -86,6 +87,7 @@ export function useProductVariantSelection(product, { onVariantImageChange } = {
     const normalizedProductCategorySlug = String(product?.category?.slug || '').toLowerCase();
     const normalizedProductCategoryName = String(product?.category?.name || '').toLowerCase();
     const isUsedPhoneProduct =
+        checkIsUsedPhone(product) ||
         normalizedProductCategorySlug === 'used-phone' ||
         normalizedProductCategoryName === 'used phone';
 
@@ -384,11 +386,12 @@ export function useProductVariantSelection(product, { onVariantImageChange } = {
 
     const formatOptionPrice = useCallback(
         (dimension, value) => {
+            if (isUsedPhoneProduct) return null;
             const price = getOptionPrice(dimension, value);
             if (price == null) return null;
             return `\u09F3${Math.round(price).toLocaleString('en-IN')}`;
         },
-        [getOptionPrice]
+        [getOptionPrice, isUsedPhoneProduct]
     );
 
     const configSummaryParts = useMemo(() => {

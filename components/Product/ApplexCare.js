@@ -2,10 +2,12 @@
 
 import { useState, useMemo, useEffect } from 'react';
 import { FiTruck, FiCreditCard, FiShield, FiChevronRight, FiX, FiPackage, FiCheckCircle, FiHeadphones } from 'react-icons/fi';
-import { bankEmiData } from '../../lib/emiData';
+import { bankEmiData, activeBankEmiData } from '../../lib/emiData';
+import { isUsedPhoneProduct as checkIsUsedPhone } from '../../lib/siteContact';
 
 function EMICalculator({ currentPrice }) {
-    const [selectedBank, setSelectedBank] = useState(bankEmiData[0]);
+    const visibleBanks = activeBankEmiData.length > 0 ? activeBankEmiData : bankEmiData.filter(b => !b.hidden);
+    const [selectedBank, setSelectedBank] = useState(visibleBanks[0] || bankEmiData[0]);
     const [customAmount, setCustomAmount] = useState(currentPrice);
 
     const calculateEMI = (price, months, chargePercent) => {
@@ -20,7 +22,8 @@ function EMICalculator({ currentPrice }) {
         const plans = [];
         const months = [
             { key: 'm3', label: 3 }, { key: 'm6', label: 6 }, { key: 'm9', label: 9 },
-            { key: 'm12', label: 12 }, { key: 'm18', label: 18 }, { key: 'm24', label: 24 }, { key: 'm36', label: 36 }
+            { key: 'm12', label: 12 }, { key: 'm18', label: 18 }, { key: 'm24', label: 24 },
+            { key: 'm30', label: 30 }, { key: 'm36', label: 36 }
         ];
         months.forEach(({ key, label }) => {
             if (bank[key]) {
@@ -40,7 +43,7 @@ function EMICalculator({ currentPrice }) {
                 <div className="w-[110px] md:w-1/3 border border-gray-100 rounded-2xl flex flex-col h-full sticky top-0 overflow-hidden">
                     <div className="p-3 bg-gray-50 border-b border-gray-100 font-black text-[10px] text-gray-400 uppercase tracking-widest sticky top-0 z-10">Select Bank</div>
                     <div className="overflow-y-auto flex-1 bg-white">
-                        {bankEmiData.map((bank, idx) => (
+                        {visibleBanks.map((bank, idx) => (
                             <button key={idx} onClick={() => setSelectedBank(bank)} className={`w-full flex flex-col md:flex-row items-center gap-1 md:gap-3 p-3 text-center md:text-left border-b border-gray-50 last:border-0 transition-all ${selectedBank.bank === bank.bank ? 'bg-gray-100 border-l-4 border-black' : 'hover:bg-gray-50'}`}>
                                 <div className={`w-8 h-8 md:w-10 md:h-10 ${!bank.logo && bank.color} rounded-xl flex items-center justify-center text-white font-black text-xs flex-shrink-0 mx-auto md:mx-0 overflow-hidden bg-white shadow-sm`}>
                                     {bank.logo ? (
@@ -99,7 +102,8 @@ function EMICalculator({ currentPrice }) {
     );
 }
 
-export default function ApplexCare({ product, currentPrice, selectedCarePlans, toggleCarePlan, openEmiTrigger = 0 }) {
+export default function ApplexCare({ product, currentPrice, selectedCarePlans, toggleCarePlan, openEmiTrigger = 0, isUsedPhoneProduct = false }) {
+    const isUsed = Boolean(isUsedPhoneProduct || checkIsUsedPhone(product));
     const [activeDrawer, setActiveDrawer] = useState(null);
     const [selectedPlanIds, setSelectedPlanIds] = useState([]);
 
@@ -116,6 +120,7 @@ export default function ApplexCare({ product, currentPrice, selectedCarePlans, t
     const price = Number(currentPrice || 0);
 
     const carePlansToShow = useMemo(() => {
+        if (isUsed) return [];
         if (isAdapter) return [{ id: 'warranty_adapter', name: '12 Month Instant Replacement', description: 'Instant replacement for issues', price: 0 }];
         if (isCable) return [{ id: 'warranty_cable', name: '6 Month Instant Replacement', description: 'Instant replacement for issues', price: 0 }];
         if (isLaptop) return [{ id: 'care_laptop', name: 'Applex Care+ 1 Year', description: 'Brand New Replacement Guarantee', price: Math.round(price * 0.05) }];
@@ -124,7 +129,7 @@ export default function ApplexCare({ product, currentPrice, selectedCarePlans, t
             { id: 'screen_care', name: 'Applex Screen Care+', description: '730 Days · One time display replacement', price: Math.round(price * 0.10) },
         ];
         return [{ id: 'warranty_12', name: '6 Months Extended Warranty', description: 'Extended hardware coverage', price: Math.round(price * 0.10) }];
-    }, [isAdapter, isCable, isLaptop, isPhoneCategory, price]);
+    }, [isUsed, isAdapter, isCable, isLaptop, isPhoneCategory, price]);
 
     const closeDrawer = () => setActiveDrawer(null);
 
@@ -210,93 +215,97 @@ export default function ApplexCare({ product, currentPrice, selectedCarePlans, t
     return (
         <div className="space-y-3 font-[family-name:var(--font-outfit)]">
             {/* Main Card */}
-            <div className="flex flex-col gap-2 mb-2">
-                {[
-                    { id: 'shipping', icon: null, iconSrc: '/svg/secure-delivery.svg', title: 'SHIPPING', sub: '0-3 Day Fast Delivery' },
-                    { id: 'emi', icon: null, iconSrc: '/svg/loan-application.svg', title: 'EMI PLANS', sub: 'All Banks & Cards Accepted' },
-                ].map((item) => (
-                    <button key={item.id} onClick={() => setActiveDrawer(item.id)} className="w-full flex items-center justify-between px-4 py-3 text-left group bg-[#FAFAFA] rounded-xl border border-gray-200 hover:border-gray-300 transition-colors">
-                        <div className="flex items-center gap-4">
-                            <div className="w-9 h-9 bg-gray-50 rounded-lg flex items-center justify-center text-gray-700 group-hover:bg-gray-100 transition-colors">
-                                {item.iconSrc ? (
-                                    <img src={item.iconSrc} alt={item.title} className="w-9 h-9 object-contain" />
-                                ) : (
-                                    <item.icon className="w-5 h-5" />
-                                )}
+            {!isUsed && (
+                <div className="flex flex-col gap-2 mb-2">
+                    {[
+                        { id: 'shipping', icon: null, iconSrc: '/svg/secure-delivery.svg', title: 'SHIPPING', sub: '0-3 Day Fast Delivery' },
+                        { id: 'emi', icon: null, iconSrc: '/svg/loan-application.svg', title: 'EMI PLANS', sub: 'All Banks & Cards Accepted' },
+                    ].map((item) => (
+                        <button key={item.id} onClick={() => setActiveDrawer(item.id)} className="w-full flex items-center justify-between px-4 py-3 text-left group bg-[#FAFAFA] rounded-xl border border-gray-200 hover:border-gray-300 transition-colors">
+                            <div className="flex items-center gap-4">
+                                <div className="w-9 h-9 bg-gray-50 rounded-lg flex items-center justify-center text-gray-700 group-hover:bg-gray-100 transition-colors">
+                                    {item.iconSrc ? (
+                                        <img src={item.iconSrc} alt={item.title} className="w-9 h-9 object-contain" />
+                                    ) : (
+                                        <item.icon className="w-5 h-5" />
+                                    )}
+                                </div>
+                                <div>
+                                    <h3 className="text-[14px] font-semibold tracking-tight text-gray-900 mb-0.5">{item.title}</h3>
+                                    <p className="text-[12px] text-gray-500">{item.sub}</p>
+                                </div>
                             </div>
-                            <div>
-                                <h3 className="text-[14px] font-semibold tracking-tight text-gray-900 mb-0.5">{item.title}</h3>
-                                <p className="text-[12px] text-gray-500">{item.sub}</p>
+                            <FiChevronRight className="w-4 h-4 text-gray-400 group-hover:text-gray-600 transition-colors" />
+                        </button>
+                    ))}
+                </div>
+            )}
+
+            {!isUsed && carePlansToShow.length > 0 && (
+                <div className="bg-[#FAFAFA] rounded-xl overflow-hidden border border-gray-200">
+
+                    {/* Applex Care+ Section */}
+                    <div className="px-4 pt-3 pb-1">
+                        {/* Header */}
+                        <div className="flex items-center gap-3 mb-3">
+                            <div className="relative w-12 h-12 flex items-center justify-center shrink-0">
+                                <svg width="48" height="48" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M 18 58 C 20 72 30 84 44 91" stroke="#F97316" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round" style={{strokeDasharray: '0', opacity: 1}} />
+                                    <path d="M 82 58 C 80 72 70 84 56 91" stroke="url(#fadeOrange)" strokeWidth="3.5" strokeLinecap="round" />
+                                    <defs>
+                                        <linearGradient id="fadeOrange" x1="82" y1="58" x2="56" y2="91" gradientUnits="userSpaceOnUse">
+                                            <stop offset="0%" stopColor="#F97316" stopOpacity="0.7" />
+                                            <stop offset="100%" stopColor="#F97316" stopOpacity="0.05" />
+                                        </linearGradient>
+                                    </defs>
+                                    <path d="M 50 15 C 62 18, 74 22, 82 26 V 52 C 82 74, 68 85, 50 92 C 32 85, 18 74, 18 52 V 26 C 26 22, 38 18, 50 15 Z" stroke="#27272A" strokeWidth="5" strokeLinejoin="round" fill="white" />
+                                    <path d="M 50 40 V 64 M 38 52 H 62" stroke="#27272A" strokeWidth="5.5" strokeLinecap="round" strokeLinejoin="round" />
+                                </svg>
+                            </div>
+                            <div className="ml-1">
+                                <h3 className="text-[14px] font-bold tracking-tight text-gray-900 mb-0.5">APPLEX CARE+</h3>
+                                <p className="text-[11px] text-gray-500">Complete protection for your device</p>
                             </div>
                         </div>
-                        <FiChevronRight className="w-4 h-4 text-gray-400 group-hover:text-gray-600 transition-colors" />
-                    </button>
-                ))}
-            </div>
 
-            <div className="bg-[#FAFAFA] rounded-xl overflow-hidden border border-gray-200">
-
-                {/* Applex Care+ Section */}
-                <div className="px-4 pt-3 pb-1">
-                    {/* Header */}
-                    <div className="flex items-center gap-3 mb-3">
-                        <div className="relative w-12 h-12 flex items-center justify-center shrink-0">
-                            <svg width="48" height="48" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M 18 58 C 20 72 30 84 44 91" stroke="#F97316" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round" style={{strokeDasharray: '0', opacity: 1}} />
-                                <path d="M 82 58 C 80 72 70 84 56 91" stroke="url(#fadeOrange)" strokeWidth="3.5" strokeLinecap="round" />
-                                <defs>
-                                    <linearGradient id="fadeOrange" x1="82" y1="58" x2="56" y2="91" gradientUnits="userSpaceOnUse">
-                                        <stop offset="0%" stopColor="#F97316" stopOpacity="0.7" />
-                                        <stop offset="100%" stopColor="#F97316" stopOpacity="0.05" />
-                                    </linearGradient>
-                                </defs>
-                                <path d="M 50 15 C 62 18, 74 22, 82 26 V 52 C 82 74, 68 85, 50 92 C 32 85, 18 74, 18 52 V 26 C 26 22, 38 18, 50 15 Z" stroke="#27272A" strokeWidth="5" strokeLinejoin="round" fill="white" />
-                                <path d="M 50 40 V 64 M 38 52 H 62" stroke="#27272A" strokeWidth="5.5" strokeLinecap="round" strokeLinejoin="round" />
-                            </svg>
-                        </div>
-                        <div className="ml-1">
-                            <h3 className="text-[14px] font-bold tracking-tight text-gray-900 mb-0.5">APPLEX CARE+</h3>
-                            <p className="text-[11px] text-gray-500">Complete protection for your device</p>
-                        </div>
-                    </div>
-
-                    {/* Plan Options */}
-                    <div className="space-y-2">
-                        {carePlansToShow.map((plan) => {
-                            const isSelected = selectedPlanIds.includes(plan.id);
-                            return (
-                                <label
-                                    key={plan.id}
-                                    className={`flex items-center justify-between px-3 py-2 rounded-2xl cursor-pointer border-[2px] transition-colors ${isSelected ? 'border-black bg-white shadow-sm' : 'border-gray-100 bg-white shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:border-gray-200'}`}
-                                >
-                                    <div className="flex items-center gap-3">
-                                        <input
-                                            type="checkbox"
-                                            checked={isSelected}
-                                            onChange={() => handlePlanSelect(plan)}
-                                            className="w-4 h-4 accent-black cursor-pointer shrink-0"
-                                        />
-                                        <div>
-                                            <h4 className="text-[13px] font-bold text-gray-900 mb-0.5">{plan.name}</h4>
-                                            <p className="text-[11px] text-gray-500">{plan.description}</p>
+                        {/* Plan Options */}
+                        <div className="space-y-2">
+                            {carePlansToShow.map((plan) => {
+                                const isSelected = selectedPlanIds.includes(plan.id);
+                                return (
+                                    <label
+                                        key={plan.id}
+                                        className={`flex items-center justify-between px-3 py-2 rounded-2xl cursor-pointer border-[2px] transition-colors ${isSelected ? 'border-black bg-white shadow-sm' : 'border-gray-100 bg-white shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:border-gray-200'}`}
+                                    >
+                                        <div className="flex items-center gap-3">
+                                            <input
+                                                type="checkbox"
+                                                checked={isSelected}
+                                                onChange={() => handlePlanSelect(plan)}
+                                                className="w-4 h-4 accent-black cursor-pointer shrink-0"
+                                            />
+                                            <div>
+                                                <h4 className="text-[13px] font-bold text-gray-900 mb-0.5">{plan.name}</h4>
+                                                <p className="text-[11px] text-gray-500">{plan.description}</p>
+                                            </div>
                                         </div>
-                                    </div>
-                                    <div className="text-[15px] font-bold text-gray-900 shrink-0 ml-2">
-                                        {plan.price === 0 ? <span className="text-green-600 text-[13px]">FREE</span> : <span>৳{plan.price.toLocaleString()}</span>}
-                                    </div>
-                                </label>
-                            );
-                        })}
+                                        <div className="text-[15px] font-bold text-gray-900 shrink-0 ml-2">
+                                            {plan.price === 0 ? <span className="text-green-600 text-[13px]">FREE</span> : <span>৳{plan.price.toLocaleString()}</span>}
+                                        </div>
+                                    </label>
+                                );
+                            })}
+                        </div>
+                    </div>
+
+                    <div className="px-4 pb-3">
+                        <a href="#" className="flex items-center justify-center gap-1 text-[11px] font-semibold text-gray-500 hover:text-gray-800 transition-colors group">
+                            Learn more about Applex Care+
+                            <FiChevronRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
+                        </a>
                     </div>
                 </div>
-
-                <div className="px-4 pb-3">
-                    <a href="#" className="flex items-center justify-center gap-1 text-[11px] font-semibold text-gray-500 hover:text-gray-800 transition-colors group">
-                        Learn more about Applex Care+
-                        <FiChevronRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
-                    </a>
-                </div>
-            </div>
+            )}
 
             {/* Trust Badges */}
             <div className="bg-[#FAFAFA] rounded-xl border border-gray-200 px-4 py-3 flex justify-between items-center">

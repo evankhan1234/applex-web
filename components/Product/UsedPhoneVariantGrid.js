@@ -2,7 +2,9 @@
 
 import React, { useMemo, useState } from 'react';
 import Image from 'next/image';
-import { FiGlobe, FiHardDrive, FiBox, FiShoppingCart, FiChevronDown } from 'react-icons/fi';
+import { FiGlobe, FiHardDrive, FiBox, FiChevronDown } from 'react-icons/fi';
+import { FaWhatsapp } from 'react-icons/fa';
+import { getWhatsAppProductUrl } from '../../lib/siteContact';
 import { applyProductLevelDiscount, getVariantListPriceNumber } from '../../hooks/useProductVariantSelection';
 import { useCart } from '../../context/CartContext';
 
@@ -138,19 +140,6 @@ export default function UsedPhoneVariantGrid({
                     </div>
 
                     <div className="flex flex-wrap items-center gap-3">
-                        {/* Sort by Price */}
-                        <div className="relative">
-                            <select
-                                value={sortByPrice}
-                                onChange={(e) => setSortByPrice(e.target.value)}
-                                className="appearance-none bg-white border border-gray-300 text-gray-700 text-sm font-medium rounded-md pl-4 pr-10 py-2 focus:outline-none focus:border-gray-400 cursor-pointer font-[family-name:var(--font-outfit)]"
-                            >
-                                <option value="default">Sort by Price</option>
-                                <option value="asc">Price: Low to High</option>
-                                <option value="desc">Price: High to Low</option>
-                            </select>
-                            <FiChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-                        </div>
 
                         {/* Filter by Color */}
                         {uniqueColors.length > 0 && (
@@ -293,24 +282,20 @@ export default function UsedPhoneVariantGrid({
                                         <div className="h-px w-full bg-gray-100" />
                                     </div>
 
-                                    {/* Price & Buy */}
-                                    <div className="p-2 sm:p-3 pt-2 flex justify-between items-end">
-                                        <div>
-                                            <p className="text-gray-400 text-[10px] sm:text-[12px] font-medium mb-0.5">Price</p>
-                                            <span
-                                                className="text-lg sm:text-2xl font-bold text-gray-900 tracking-tight font-[family-name:var(--font-outfit)]"
-                                                style={{ fontFamily: "'Hind Siliguri','Noto Sans Bengali','Arial',sans-serif" }}
-                                            >
-                                                {displayPrice}
-                                            </span>
-                                        </div>
-                                        <button
-                                            onClick={() => handleAddToCart(imei)}
-                                            className="border border-gray-900 text-gray-900 hover:bg-gray-900 hover:text-white transition-colors rounded-md px-3 py-1.5 flex items-center gap-1.5 font-semibold text-sm font-[family-name:var(--font-outfit)]"
+                                    {/* Call or Chat Action */}
+                                    <div className="p-2 sm:p-3 pt-2">
+                                        <a
+                                            href={getWhatsAppProductUrl(
+                                                product,
+                                                `${product?.name || 'Device'} | ${imei.color || ''} ${imei.storage || ''} | Battery: ${imei.battery_life || 'N/A'} | Region: ${imei.region || 'N/A'}`
+                                            )}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="w-full bg-[#25D366] hover:bg-[#20ba59] text-white transition-colors rounded-md px-3 py-2 flex items-center justify-center gap-2 font-bold text-sm font-[family-name:var(--font-outfit)] shadow-sm"
                                         >
-                                            <FiShoppingCart className="w-4 h-4" />
-                                            Add to Cart
-                                        </button>
+                                            <FaWhatsapp className="w-4 h-4" />
+                                            Call or Chat
+                                        </a>
                                     </div>
                                 </div>
                             );

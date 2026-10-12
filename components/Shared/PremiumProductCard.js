@@ -2,13 +2,17 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
+import { FaWhatsapp } from 'react-icons/fa';
 import { useWishlist } from '../../context/WishlistContext';
 import { getSellableImeis } from '../../lib/imeis';
+import { isUsedPhoneProduct, getWhatsAppProductUrl } from '../../lib/siteContact';
 
 export default function PremiumProductCard({ product, variant = 'default', showUsedTag = false, className = '' }) {
     const isCompact = variant === 'compact';
     const isDeal = variant === 'deal';
     const { isInWishlist, toggleWishlist } = useWishlist();
+
+    const isUsed = Boolean(showUsedTag || isUsedPhoneProduct(product));
 
     const slug = product.name
         ? `${product.name.toLowerCase().replace(/\s+/g, '-')}-${product.id}`
@@ -62,7 +66,7 @@ export default function PremiumProductCard({ product, variant = 'default', showU
                     className="object-contain transition-transform duration-500 group-hover:scale-[1.02]"
                     unoptimized
                 />
-                {showUsedTag && (
+                {(showUsedTag || isUsed) && (
                     <Image
                         src="/used_tag.png"
                         alt="Used product"
@@ -71,7 +75,7 @@ export default function PremiumProductCard({ product, variant = 'default', showU
                         className="absolute left-5 bottom-8 z-10 h-auto w-[64px] md:w-[80px]"
                     />
                 )}
-                {product.discount && !isCompact && (
+                {product.discount && !isCompact && !isUsed && (
                     <div className="absolute top-0 left-0 z-10 w-[52px] h-[24px] flex items-center justify-center text-[10px] font-semibold text-white" style={{background: '#111111', borderRadius: '10px 0 8px 0'}}>
                         {product.discount}
                     </div>
@@ -109,26 +113,45 @@ export default function PremiumProductCard({ product, variant = 'default', showU
             </div>
 
             <div className={isCompact ? 'px-2 pb-2 pt-1' : 'px-3 md:px-4 pb-3 md:pb-4'}>
-                <div className={`flex items-baseline gap-2 ${isCompact ? 'mt-0.5' : 'mt-1'}`}>
-                    <span className={isCompact
-                        ? 'font-bold text-[#0f172a] font-[family-name:var(--font-outfit)] text-[12px] leading-none tracking-normal'
-                        : 'text-base font-bold text-[#0f172a] font-[family-name:var(--font-outfit)]'
-                    }>
-                        {isCompact ? displayPrice : displayPrice && (
-                            <span className="inline-flex items-baseline">
-                                <img src="/taka.svg" alt="৳" className="h-[13px] w-auto" />
-                                <span className="text-[20px] font-bold font-[family-name:var(--font-outfit)]">{displayPrice.replace('৳', '').trim()}</span>
+                {isUsed ? (
+                    <div className={`flex items-center ${isCompact ? 'mt-0.5' : 'mt-1'}`}>
+                        <button
+                            type="button"
+                            onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                window.open(getWhatsAppProductUrl(product), '_blank');
+                            }}
+                            className={`inline-flex items-center justify-center gap-1.5 font-bold rounded-full bg-[#25D366]/10 text-[#128C7E] hover:bg-[#25D366] hover:text-white border border-[#25D366]/30 transition-all font-[family-name:var(--font-outfit)] shadow-sm ${
+                                isCompact ? 'px-2 py-0.5 text-[10px]' : 'px-2.5 py-1 text-[11px] md:text-[12px]'
+                            }`}
+                        >
+                            <FaWhatsapp className={isCompact ? 'w-2.5 h-2.5' : 'w-3.5 h-3.5'} />
+                            <span>Call or Chat</span>
+                        </button>
+                    </div>
+                ) : (
+                    <div className={`flex items-baseline gap-2 ${isCompact ? 'mt-0.5' : 'mt-1'}`}>
+                        <span className={isCompact
+                            ? 'font-bold text-[#0f172a] font-[family-name:var(--font-outfit)] text-[12px] leading-none tracking-normal'
+                            : 'text-base font-bold text-[#0f172a] font-[family-name:var(--font-outfit)]'
+                        }>
+                            {isCompact ? displayPrice : displayPrice && (
+                                <span className="inline-flex items-baseline">
+                                    <img src="/taka.svg" alt="৳" className="h-[13px] w-auto" />
+                                    <span className="text-[20px] font-bold font-[family-name:var(--font-outfit)]">{displayPrice.replace('৳', '').trim()}</span>
+                                </span>
+                            )}
+                        </span>
+                        {displayOldPrice && (
+                            <span className={`text-[#71717A] line-through font-[family-name:var(--font-outfit)] ${
+                                isCompact ? 'text-[10px] leading-none' : 'text-xs'
+                            }`}>
+                                {displayOldPrice}
                             </span>
                         )}
-                    </span>
-                    {displayOldPrice && (
-                        <span className={`text-[#71717A] line-through font-[family-name:var(--font-outfit)] ${
-                            isCompact ? 'text-[10px] leading-none' : 'text-xs'
-                        }`}>
-                            {displayOldPrice}
-                        </span>
-                    )}
-                </div>
+                    </div>
+                )}
 
                 <h3 className={`overflow-hidden [display:-webkit-box] [-webkit-line-clamp:2] [-webkit-box-orient:vertical] font-semibold text-[#0f172a] font-[family-name:var(--font-outfit)] ${
                     isCompact

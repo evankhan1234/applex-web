@@ -3,8 +3,10 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { FiHeart, FiTrash2, FiShoppingCart, FiShoppingBag } from 'react-icons/fi';
+import { FaWhatsapp } from 'react-icons/fa';
 import { useWishlist } from '../../context/WishlistContext';
 import { useCart } from '../../context/CartContext';
+import { isUsedPhoneProduct, getWhatsAppProductUrl } from '../../lib/siteContact';
 
 export default function WishlistPage() {
     const { wishlist, removeFromWishlist } = useWishlist();
@@ -56,66 +58,86 @@ export default function WishlistPage() {
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                        {wishlist.map((product) => (
-                            <div key={product.id} className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden flex flex-col group h-full">
-                                {/* Image Container */}
-                                <Link
-                                    href={`/product/${product.name.toLowerCase().replace(/\s+/g, '-')}-${product.id}`}
-                                    className="relative aspect-square bg-gray-50 overflow-hidden shrink-0"
-                                >
-                                    <Image
-                                        src={product.imageUrl || "/no-image.svg"}
-                                        alt={product.name}
-                                        fill
-                                        className="object-contain p-6 group-hover:scale-110 transition-transform duration-500"
-                                        unoptimized
-                                    />
-                                    {product.discount && (
-                                        <div className="absolute top-3 left-3 px-2.5 py-1 bg-red-600 text-white text-[10px] font-black rounded-lg shadow-sm">
-                                            {product.discount}
+                        {wishlist.map((product) => {
+                            const isUsed = isUsedPhoneProduct(product);
+                            return (
+                                <div key={product.id} className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden flex flex-col group h-full">
+                                    {/* Image Container */}
+                                    <Link
+                                        href={`/product/${product.name.toLowerCase().replace(/\s+/g, '-')}-${product.id}`}
+                                        className="relative aspect-square bg-gray-50 overflow-hidden shrink-0"
+                                    >
+                                        <Image
+                                            src={product.imageUrl || "/no-image.svg"}
+                                            alt={product.name}
+                                            fill
+                                            className="object-contain p-6 group-hover:scale-110 transition-transform duration-500"
+                                            unoptimized
+                                        />
+                                        {!isUsed && product.discount && (
+                                            <div className="absolute top-3 left-3 px-2.5 py-1 bg-red-600 text-white text-[10px] font-black rounded-lg shadow-sm">
+                                                {product.discount}
+                                            </div>
+                                        )}
+                                    </Link>
+
+                                    {/* Content */}
+                                    <div className="p-5 flex flex-col flex-1">
+                                        <div className="mb-2">
+                                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">{product.brand}</p>
+                                            <Link
+                                                href={`/product/${product.name.toLowerCase().replace(/\s+/g, '-')}-${product.id}`}
+                                                className="text-sm md:text-base font-bold text-gray-900 hover:text-blue-600 transition-colors line-clamp-2 leading-snug"
+                                            >
+                                                {product.name}
+                                            </Link>
                                         </div>
-                                    )}
-                                </Link>
 
-                                {/* Content */}
-                                <div className="p-5 flex flex-col flex-1">
-                                    <div className="mb-2">
-                                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">{product.brand}</p>
-                                        <Link
-                                            href={`/product/${product.name.toLowerCase().replace(/\s+/g, '-')}-${product.id}`}
-                                            className="text-sm md:text-base font-bold text-gray-900 hover:text-blue-600 transition-colors line-clamp-2 leading-snug"
-                                        >
-                                            {product.name}
-                                        </Link>
-                                    </div>
-
-                                    <div className="mt-auto">
-                                        <div className="flex items-baseline gap-2 mb-4">
-                                            <span className="text-lg font-black text-gray-900">{product.price}</span>
-                                            {product.oldPrice && (
-                                                <span className="text-sm text-gray-400 line-through font-medium">{product.oldPrice}</span>
+                                        <div className="mt-auto">
+                                            {isUsed ? (
+                                                <div className="mb-4">
+                                                    <span className="text-sm font-bold text-[#25D366]">Call or Chat for Price</span>
+                                                </div>
+                                            ) : (
+                                                <div className="flex items-baseline gap-2 mb-4">
+                                                    <span className="text-lg font-black text-gray-900">{product.price}</span>
+                                                    {product.oldPrice && (
+                                                        <span className="text-sm text-gray-400 line-through font-medium">{product.oldPrice}</span>
+                                                    )}
+                                                </div>
                                             )}
-                                        </div>
 
-                                        <div className="flex gap-2">
-                                            <button
-                                                onClick={() => handleAddToCart(product)}
-                                                className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl transition-all active:scale-95"
-                                            >
-                                                <FiShoppingCart className="w-4 h-4" /> Add to Cart
-                                            </button>
-                                            <button
-                                                onClick={() => removeFromWishlist(product.id)}
-                                                className="w-10 h-10 flex items-center justify-center border border-gray-100 bg-gray-50 text-gray-400 hover:text-red-500 hover:bg-red-50 hover:border-red-100 rounded-xl transition-all active:scale-95"
-                                                title="Remove from wishlist"
-                                            >
-                                                <FiTrash2 className="w-4 h-4" />
-                                            </button>
+                                            <div className="flex gap-2">
+                                                {isUsed ? (
+                                                    <a
+                                                        href={getWhatsAppProductUrl(product)}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-[#25D366] hover:bg-[#20ba59] text-white text-xs font-bold rounded-xl transition-all active:scale-95 shadow-sm"
+                                                    >
+                                                        <FaWhatsapp className="w-4 h-4" /> Call or Chat
+                                                    </a>
+                                                ) : (
+                                                    <button
+                                                        onClick={() => handleAddToCart(product)}
+                                                        className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl transition-all active:scale-95"
+                                                    >
+                                                        <FiShoppingCart className="w-4 h-4" /> Add to Cart
+                                                    </button>
+                                                )}
+                                                <button
+                                                    onClick={() => removeFromWishlist(product.id)}
+                                                    className="w-10 h-10 flex items-center justify-center border border-gray-100 bg-gray-50 text-gray-400 hover:text-red-500 hover:bg-red-50 hover:border-red-100 rounded-xl transition-all active:scale-95"
+                                                    title="Remove from wishlist"
+                                                >
+                                                    <FiTrash2 className="w-4 h-4" />
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
                 )}
             </div>

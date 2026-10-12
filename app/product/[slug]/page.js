@@ -12,6 +12,7 @@ import ApplexCare from '../../../components/Product/ApplexCare';
 import ProductCard from '../../../components/Shared/PremiumProductCard';
 import { getProductById, getRelatedProduct } from '../../../lib/api';
 import { getSellableImeis } from '../../../lib/imeis';
+import { isUsedPhoneProduct as checkIsUsedPhone } from '../../../lib/siteContact';
 
 function mapSeedProductForPdp(seed) {
     if (!seed || !seed.id) return null;
@@ -319,6 +320,7 @@ export default function ProductDetailsPage() {
     const normalizedProductCategorySlug = String(productData?.category?.slug || '').toLowerCase();
     const normalizedProductCategoryName = String(productData?.category?.name || '').toLowerCase();
     const isUsedPhoneProduct =
+        checkIsUsedPhone(productData) ||
         normalizedProductCategorySlug === 'used-phone' ||
         normalizedProductCategoryName === 'used phone';
 
@@ -434,6 +436,7 @@ export default function ProductDetailsPage() {
                                     selectedCarePlans={selectedCarePlans}
                                     toggleCarePlan={toggleCarePlan}
                                     openEmiTrigger={emiOpenTrigger}
+                                    isUsedPhoneProduct={isUsedPhoneProduct}
                                 />
                             </div>
                         </div>

@@ -6,6 +6,8 @@ import { getProductById, searchProducts } from "../../lib/api";
 import Link from "next/link";
 import Image from "next/image";
 import { FiSearch } from "react-icons/fi";
+import { FaWhatsapp } from "react-icons/fa";
+import { isUsedPhoneProduct, getWhatsAppProductUrl } from "../../lib/siteContact";
 
 const MAX_COMPARE_SLOTS = 3;
 const EMPTY_SLOTS = Array(MAX_COMPARE_SLOTS).fill(null);
@@ -37,6 +39,8 @@ function mapSearchResult(p) {
       p.image_path2 ||
       (Array.isArray(p.image_paths) && p.image_paths[0]) ||
       "/no-image.svg",
+    isUsed: isUsedPhoneProduct(p),
+    rawSource: p,
   };
 }
 
@@ -88,6 +92,8 @@ function mapDetailedProduct(p) {
       (Array.isArray(p.image_paths) && p.image_paths[0]) ||
       "/no-image.svg",
     specs: specsFromApi.length > 0 ? specsFromApi : fallbackSpecs,
+    isUsed: isUsedPhoneProduct(p),
+    rawSource: p,
   };
 }
 
@@ -158,8 +164,8 @@ export default function ComparePage() {
       id: product.id,
       name: product.name,
       brand: product.brand,
-      price: `৳ ${Number(product.price || 0).toLocaleString("en-IN")}`,
-      oldPrice: product.oldPrice ? `৳ ${Number(product.oldPrice).toLocaleString("en-IN")}` : null,
+      price: product.isUsed ? "Call or Chat" : `৳ ${Number(product.price || 0).toLocaleString("en-IN")}`,
+      oldPrice: !product.isUsed && product.oldPrice ? `৳ ${Number(product.oldPrice).toLocaleString("en-IN")}` : null,
       imageUrl: product.imageUrl,
     });
     setSlotQueries((prev) => prev.map((v, i) => (i === idx ? "" : v)));
@@ -189,7 +195,7 @@ export default function ComparePage() {
       rowMap.set("Price", rowMap.get("Price") || ["", "", ""]);
       rowMap.get("Brand")[idx] = p.brand || "—";
       rowMap.get("Model")[idx] = p.name || "—";
-      rowMap.get("Price")[idx] = `৳ ${Number(p.price || 0).toLocaleString("en-IN")}`;
+      rowMap.get("Price")[idx] = p.isUsed ? "Call or Chat" : `৳ ${Number(p.price || 0).toLocaleString("en-IN")}`;
 
       p.specs.forEach((s) => {
         const key = String(s.name || "").trim();
@@ -261,7 +267,7 @@ export default function ComparePage() {
                               <div className="mt-0.5 flex items-center gap-2">
                                 <span className="text-[12px] text-[#6b7280] truncate">{r.brand || "—"}</span>
                                 <span className="text-[12px] font-bold text-[#111827]">
-                                  ৳ {Number(r.price || 0).toLocaleString("en-IN")}
+                                  {r.isUsed ? "Call or Chat" : `৳ ${Number(r.price || 0).toLocaleString("en-IN")}`}
                                 </span>
                               </div>
                             </div>
@@ -292,16 +298,24 @@ export default function ComparePage() {
                           {selected.name}
                         </h3>
 
-                        <div className="mt-2 flex items-end gap-2">
-                          <span className="text-[28px] md:text-[30px] font-extrabold text-[#111827] leading-none">
-                            ৳ {Number(selected.price || 0).toLocaleString("en-IN")}
-                          </span>
-                          {selected.oldPrice > selected.price && (
-                            <span className="text-[17px] text-[#7c8595] line-through mb-0.5">
-                              {Number(selected.oldPrice).toLocaleString("en-IN")}
+                        {selected.isUsed ? (
+                          <div className="mt-2">
+                            <span className="text-[20px] md:text-[22px] font-bold text-[#25D366]">
+                              Call or Chat for Price
                             </span>
-                          )}
-                        </div>
+                          </div>
+                        ) : (
+                          <div className="mt-2 flex items-end gap-2">
+                            <span className="text-[28px] md:text-[30px] font-extrabold text-[#111827] leading-none">
+                              ৳ {Number(selected.price || 0).toLocaleString("en-IN")}
+                            </span>
+                            {selected.oldPrice > selected.price && (
+                              <span className="text-[17px] text-[#7c8595] line-through mb-0.5">
+                                {Number(selected.oldPrice).toLocaleString("en-IN")}
+                              </span>
+                            )}
+                          </div>
+                        )}
 
                         <div className="mt-3 flex gap-2">
                           <button
@@ -311,12 +325,23 @@ export default function ComparePage() {
                           >
                             Remove
                           </button>
-                          <Link
-                            href={`/product/${toSlug(selected.name, selected.id)}`}
-                            className="h-9 px-5 rounded-full bg-[#ff8a1f] text-white text-[14px] font-semibold inline-flex items-center"
-                          >
-                            Shop Now
-                          </Link>
+                          {selected.isUsed ? (
+                            <a
+                              href={getWhatsAppProductUrl(selected.rawSource || selected)}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="h-9 px-5 rounded-full bg-[#25D366] hover:bg-[#20ba59] text-white text-[14px] font-semibold inline-flex items-center gap-1.5 shadow-sm"
+                            >
+                              <FaWhatsapp className="w-4 h-4" /> Call or Chat
+                            </a>
+                          ) : (
+                            <Link
+                              href={`/product/${toSlug(selected.name, selected.id)}`}
+                              className="h-9 px-5 rounded-full bg-[#ff8a1f] text-white text-[14px] font-semibold inline-flex items-center"
+                            >
+                              Shop Now
+                            </Link>
+                          )}
                         </div>
                       </>
                     ) : (

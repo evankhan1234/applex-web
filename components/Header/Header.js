@@ -17,6 +17,7 @@ import {
   SEARCH_FEED_SCROLL_ROWS,
 } from '../../hooks/useSearchDropdownFeed';
 import ProductCard from '../Shared/PremiumProductCard';
+import { isUsedPhoneProduct } from '../../lib/siteContact';
 
 export default function Header({ categories = [] }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -493,24 +494,31 @@ export default function Header({ categories = [] }) {
                               </div>
 
                               <div className="grid md:hidden grid-cols-1 sm:grid-cols-2 gap-2">
-                                {filteredSearchResults.map(product => (
-                                  <Link
-                                    key={product.id}
-                                    href={`/product/${product.name.toLowerCase().replace(/\s+/g, '-')}-${product.id}`}
-                                    onClick={closeSearchModal}
-                                    className="group flex flex-row items-center gap-4 p-3 rounded-xl hover:bg-gray-50 border border-transparent hover:border-gray-200 transition-all shadow-sm shadow-transparent hover:shadow-gray-200/50"
-                                  >
-                                    <div className="w-16 h-16 relative bg-white border border-gray-100 rounded-lg shrink-0 overflow-hidden">
-                                      <Image src={product.imageUrl} alt={product.name} fill className="object-contain p-2 hover:scale-110 transition-transform duration-300" unoptimized />
-                                    </div>
-                                    <div className="flex-1 min-w-0 flex flex-col gap-1">
-                                      <h4 className="text-sm font-semibold text-gray-800 line-clamp-2 leading-tight group-hover:text-blue-600 transition-colors">
-                                        {product.name}
-                                      </h4>
-                                      <p className="text-base font-extrabold text-gray-900">{product.price}</p>
-                                    </div>
-                                  </Link>
-                                ))}
+                                {filteredSearchResults.map(product => {
+                                  const isUsed = isUsedPhoneProduct(product);
+                                  return (
+                                    <Link
+                                      key={product.id}
+                                      href={`/product/${product.name.toLowerCase().replace(/\s+/g, '-')}-${product.id}`}
+                                      onClick={closeSearchModal}
+                                      className="group flex flex-row items-center gap-4 p-3 rounded-xl hover:bg-gray-50 border border-transparent hover:border-gray-200 transition-all shadow-sm shadow-transparent hover:shadow-gray-200/50"
+                                    >
+                                      <div className="w-16 h-16 relative bg-white border border-gray-100 rounded-lg shrink-0 overflow-hidden">
+                                        <Image src={product.imageUrl} alt={product.name} fill className="object-contain p-2 hover:scale-110 transition-transform duration-300" unoptimized />
+                                      </div>
+                                      <div className="flex-1 min-w-0 flex flex-col gap-1">
+                                        <h4 className="text-sm font-semibold text-gray-800 line-clamp-2 leading-tight group-hover:text-blue-600 transition-colors">
+                                          {product.name}
+                                        </h4>
+                                        {isUsed ? (
+                                          <p className="text-xs font-bold text-[#25D366]">Call or Chat</p>
+                                        ) : (
+                                          <p className="text-base font-extrabold text-gray-900">{product.price}</p>
+                                        )}
+                                      </div>
+                                    </Link>
+                                  );
+                                })}
                               </div>
                             </div>
                           </div>

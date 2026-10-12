@@ -3,8 +3,10 @@
 import { useState, useMemo, useEffect } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { FiMinus, FiPlus } from 'react-icons/fi';
+import { FiMinus, FiPlus, FiPhone } from 'react-icons/fi';
+import { FaWhatsapp } from 'react-icons/fa';
 import { useCart } from '../../context/CartContext';
+import { isUsedPhoneProduct as checkIsUsedPhone, getWhatsAppProductUrl, EMERGENCY_PHONE_DISPLAY, TEL_HREF } from '../../lib/siteContact';
 
 function buildPricingStats(product, currentPriceNumber) {
     const offerPrice = Math.max(0, Math.round(currentPriceNumber));
@@ -43,6 +45,7 @@ export default function ProductPurchaseBar({
     selectedCarePlans = [],
     displayPrice,
     showSummary = false,
+    isUsedPhoneProduct = false,
     className = '',
 }) {
     const { addToCart } = useCart();
@@ -109,6 +112,44 @@ export default function ProductPurchaseBar({
         });
         router.push('/checkout');
     };
+
+    const isUsed = Boolean(isUsedPhoneProduct || checkIsUsedPhone(product));
+
+    const variantSummary = useMemo(() => {
+        if (!variantSelection) return '';
+        const parts = [];
+        if (variantSelection.selectedModel) parts.push(variantSelection.selectedModel);
+        if (variantSelection.selectedColor) parts.push(variantSelection.selectedColor);
+        if (variantSelection.selectedStorage) parts.push(variantSelection.selectedStorage);
+        if (variantSelection.selectedBattery) parts.push(`Battery: ${variantSelection.selectedBattery}`);
+        if (variantSelection.selectedRegion) parts.push(`Region: ${variantSelection.selectedRegion}`);
+        return parts.join(' | ');
+    }, [variantSelection]);
+
+    if (isUsed) {
+        return (
+            <div className={className}>
+                <div className="flex flex-col sm:flex-row items-stretch gap-3">
+                    <a
+                        href={getWhatsAppProductUrl(product, variantSummary)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="cursor-pointer flex-1 bg-[#25D366] hover:bg-[#20ba59] text-white font-bold py-3.5 md:py-4 px-4 rounded-lg transition-all text-sm tracking-tight inline-flex items-center justify-center gap-2 font-[family-name:var(--font-outfit)] shadow-sm"
+                    >
+                        <FaWhatsapp size={20} />
+                        <span>Call or Chat on WhatsApp</span>
+                    </a>
+                    <a
+                        href={TEL_HREF}
+                        className="cursor-pointer sm:w-auto px-5 bg-white border border-gray-900 text-gray-900 font-bold py-3.5 md:py-4 rounded-lg hover:bg-gray-50 transition-all text-sm tracking-tight inline-flex items-center justify-center gap-2 font-[family-name:var(--font-outfit)]"
+                    >
+                        <FiPhone size={18} />
+                        <span>Call: {EMERGENCY_PHONE_DISPLAY}</span>
+                    </a>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className={className}>
