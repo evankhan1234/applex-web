@@ -23,6 +23,11 @@ const outfit = Outfit({
 export const metadata = {
   title: "Applex | Premium Smartphones & Devices",
   description: "Bangladesh's premier destination for authentic smartphones, tablets, and tech accessories. Shop iPhone, Samsung, OnePlus & more at Applex.",
+  verification: {
+    other: {
+      "facebook-domain-verification": "3o8jywpgg1pbxd7vm3uop39qebhnzn",
+    },
+  },
   icons: {
     icon: "/favicon.ico",
   },
