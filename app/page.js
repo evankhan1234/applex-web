@@ -1,3 +1,4 @@
+import { toProductSlug } from "../lib/slug";
 import Hero from "../components/Hero/Hero";
 import SEOContent from "../components/Footer/SEOContent";
 import ShopCategories from "../components/ShopCategories/ShopCategories";
@@ -99,7 +100,7 @@ export default async function Home() {
     mapped.title = mapped.name;
     mapped.description = `${mapped.brand} • ${mapped.categoryName}`;
     mapped.badge = hasDiscount ? 'SALE' : null;
-    mapped.link = `/product/${mapped.name.toLowerCase().replace(/\s+/g, '-')}-${mapped.id}`;
+    mapped.link = `/product/${toProductSlug(mapped.name, mapped.id)}`;
     if (hasDiscount) {
       mapped.savings = `Save ৳ ${(basePrice - price).toLocaleString('en-IN')}`;
     }

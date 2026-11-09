@@ -7,6 +7,7 @@ import { FaWhatsapp } from 'react-icons/fa';
 import { useWishlist } from '../../context/WishlistContext';
 import { useCart } from '../../context/CartContext';
 import { isUsedPhoneProduct, getWhatsAppProductUrl } from '../../lib/siteContact';
+import { toProductSlug } from '../../lib/slug';
 
 export default function WishlistPage() {
     const { wishlist, removeFromWishlist } = useWishlist();
@@ -64,7 +65,7 @@ export default function WishlistPage() {
                                 <div key={product.id} className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden flex flex-col group h-full">
                                     {/* Image Container */}
                                     <Link
-                                        href={`/product/${product.name.toLowerCase().replace(/\s+/g, '-')}-${product.id}`}
+                                        href={`/product/${toProductSlug(product.name, product.id)}`}
                                         className="relative aspect-square bg-gray-50 overflow-hidden shrink-0"
                                     >
                                         <Image
@@ -86,7 +87,7 @@ export default function WishlistPage() {
                                         <div className="mb-2">
                                             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">{product.brand}</p>
                                             <Link
-                                                href={`/product/${product.name.toLowerCase().replace(/\s+/g, '-')}-${product.id}`}
+                                                href={`/product/${toProductSlug(product.name, product.id)}`}
                                                 className="text-sm md:text-base font-bold text-gray-900 hover:text-blue-600 transition-colors line-clamp-2 leading-snug"
                                             >
                                                 {product.name}

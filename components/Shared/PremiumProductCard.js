@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { FaWhatsapp } from 'react-icons/fa';
 import { useWishlist } from '../../context/WishlistContext';
 import { getSellableImeis } from '../../lib/imeis';
+import { toProductSlug } from '../../lib/slug';
 import { isUsedPhoneProduct, getWhatsAppProductUrl } from '../../lib/siteContact';
 
 export default function PremiumProductCard({ product, variant = 'default', showUsedTag = false, className = '' }) {
@@ -14,9 +15,7 @@ export default function PremiumProductCard({ product, variant = 'default', showU
 
     const isUsed = Boolean(showUsedTag || isUsedPhoneProduct(product));
 
-    const slug = product.name
-        ? `${product.name.toLowerCase().replace(/\s+/g, '-')}-${product.id}`
-        : String(product.id);
+    const slug = toProductSlug(product.name, product.id);
 
     // Price display
     const displayPrice = product.price || (product.retails_price ? `৳ ${Number(product.retails_price).toLocaleString('en-IN')}` : '');

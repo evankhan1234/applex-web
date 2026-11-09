@@ -11,6 +11,7 @@ import ProductTabs from '../../../components/Product/ProductTabs';
 import ApplexCare from '../../../components/Product/ApplexCare';
 import ProductCard from '../../../components/Shared/PremiumProductCard';
 import { getProductById, getRelatedProduct } from '../../../lib/api';
+import { extractProductIdFromSlug } from '../../../lib/slug';
 import { getSellableImeis } from '../../../lib/imeis';
 import { isUsedPhoneProduct as checkIsUsedPhone } from '../../../lib/siteContact';
 
@@ -66,25 +67,13 @@ function mapSeedProductForPdp(seed) {
 
 export default function ProductDetailsPage() {
     const params = useParams();
-    const slug = typeof params.slug === 'string' ? params.slug : params.slug?.[0] || '';
+    const rawSlug = params?.slug;
+    const slug = Array.isArray(rawSlug) ? rawSlug.join('/') : String(rawSlug || '');
 
-    // Parse product ID from slug (supports "product-name-12345" or just "12345")
+    // Parse product ID from slug (supports catch-all segments, clean slugs, or raw IDs)
     const productId = useMemo(() => {
-        if (!slug) return null;
-        const decoded = decodeURIComponent(slug).trim();
-
-        // Case 1: slug is just the numeric ID
-        if (/^\d+$/.test(decoded)) {
-            const directId = Number(decoded);
-            return Number.isFinite(directId) && directId > 0 ? directId : null;
-        }
-
-        // Case 2: slug is "name-<id>"
-        const parts = decoded.split('-');
-        const maybeId = parts[parts.length - 1];
-        const idNum = Number(maybeId);
-        return Number.isFinite(idNum) && idNum > 0 ? idNum : null;
-    }, [slug]);
+        return extractProductIdFromSlug(params?.slug);
+    }, [params?.slug]);
 
     const [productData, setProductData] = useState(null);
     const [isLoading, setIsLoading] = useState(true);

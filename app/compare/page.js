@@ -8,12 +8,12 @@ import Image from "next/image";
 import { FiSearch } from "react-icons/fi";
 import { FaWhatsapp } from "react-icons/fa";
 import { isUsedPhoneProduct, getWhatsAppProductUrl } from "../../lib/siteContact";
+import { toProductSlug } from "../../lib/slug";
 
 const MAX_COMPARE_SLOTS = 3;
 const EMPTY_SLOTS = Array(MAX_COMPARE_SLOTS).fill(null);
 
-const toSlug = (name = "", id = "") =>
-  name ? `${name.toLowerCase().replace(/\s+/g, "-")}-${id}` : String(id || "");
+const toSlug = toProductSlug;
 
 function mapSearchResult(p) {
   const basePrice = Number(p.retails_price || p.discounted_price || 0);

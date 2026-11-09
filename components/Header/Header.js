@@ -18,6 +18,7 @@ import {
 } from '../../hooks/useSearchDropdownFeed';
 import ProductCard from '../Shared/PremiumProductCard';
 import { isUsedPhoneProduct } from '../../lib/siteContact';
+import { toProductSlug } from '../../lib/slug';
 
 export default function Header({ categories = [] }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -499,7 +500,7 @@ export default function Header({ categories = [] }) {
                                   return (
                                     <Link
                                       key={product.id}
-                                      href={`/product/${product.name.toLowerCase().replace(/\s+/g, '-')}-${product.id}`}
+                                      href={`/product/${toProductSlug(product.name, product.id)}`}
                                       onClick={closeSearchModal}
                                       className="group flex flex-row items-center gap-4 p-3 rounded-xl hover:bg-gray-50 border border-transparent hover:border-gray-200 transition-all shadow-sm shadow-transparent hover:shadow-gray-200/50"
                                     >

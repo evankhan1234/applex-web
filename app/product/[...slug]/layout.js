@@ -1,19 +1,9 @@
 import { getProductById } from '../../../lib/api';
+import { extractProductIdFromSlug } from '../../../lib/slug';
 
 export async function generateMetadata({ params }) {
     const awaitedParams = await params;
-    const slug = typeof awaitedParams.slug === 'string' ? awaitedParams.slug : awaitedParams.slug?.[0] || '';
-
-    let productId = null;
-    if (slug) {
-        const decoded = decodeURIComponent(slug).trim();
-        if (/^\d+$/.test(decoded)) {
-            productId = Number(decoded);
-        } else {
-            const parts = decoded.split('-');
-            productId = Number(parts[parts.length - 1]);
-        }
-    }
+    const productId = extractProductIdFromSlug(awaitedParams?.slug);
 
     if (!productId || !Number.isFinite(productId) || productId <= 0) {
         return {
